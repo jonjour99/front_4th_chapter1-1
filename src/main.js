@@ -1,24 +1,24 @@
-const MainPage = () => `
+const MainPage = (isLoggedIn = false) => `
   <div class="bg-gray-100 min-h-screen flex justify-center">
     <div class="max-w-md w-full">
       <header class="bg-blue-600 text-white p-4 sticky top-0">
         <h1 class="text-2xl font-bold">항해플러스</h1>
       </header>
 
-      <nav class="bg-white shadow-md p-2 sticky top-14">
-        <ul class="flex justify-around">
-          <li><a href="/" class="text-blue-600">홈</a></li>
-          <li><a href="/profile" class="text-gray-600">프로필</a></li>
-          <li><a href="#" class="text-gray-600">로그아웃</a></li>
-        </ul>
-      </nav>
+      ${Navigation(isLoggedIn)}
 
       <main class="p-4">
-        <div class="mb-4 bg-white rounded-lg shadow p-4">
-          <textarea class="w-full p-2 border rounded" placeholder="무슨 생각을 하고 계신가요?"></textarea>
-          <button class="mt-2 bg-blue-600 text-white px-4 py-2 rounded">게시</button>
-        </div>
-
+        ${
+          isLoggedIn
+            ? `
+          <div class="mb-4 bg-white rounded-lg shadow p-4">
+            <textarea class="w-full p-2 border rounded" placeholder="무슨 생각을 하고 계신가요?"></textarea>
+            <button class="mt-2 bg-blue-600 text-white px-4 py-2 rounded">게시</button>
+          </div>
+        `
+            : ""
+        }
+        
         <div class="space-y-4">
 
           <div class="bg-white rounded-lg shadow p-4">
@@ -232,6 +232,24 @@ const ProfilePage = () => `
     </div>
   </div>
 `;
+const Navigation = (isLoggedIn) => `
+  <nav class="bg-white shadow-md p-2">
+    <ul class="flex justify-around">
+      ${
+        isLoggedIn
+          ? `
+        <li><a href="/" class="text-blue-600">홈</a></li>
+        <li><a href="/profile" class="text-gray-600">프로필</a></li>
+        <li><a href="#" class="text-gray-600" id="logout">로그아웃</a></li>
+      `
+          : `
+        <li><a href="/" class="text-blue-600">홈</a></li>
+        <li><a href="/login" class="text-gray-600">로그인</a></li>
+      `
+      }
+    </ul>
+  </nav>
+`;
 
 document.body.innerHTML = `
   ${MainPage()}
@@ -239,3 +257,92 @@ document.body.innerHTML = `
   ${LoginPage()}
   ${ErrorPage()}
 `;
+
+class Router {
+  constructor() {
+    this.routes = {};
+    this.state = {
+      isLoggedIn: false,
+    };
+
+    window.addEventListener("popstate", this.handlePopState.bind(this));
+    window.addEventListener("DOMContentLoaded", () => {
+      this.handleRoute(window.location.pathname);
+    });
+  }
+
+  addRoute(path, handler) {
+    this.routes[path] = handler;
+  }
+
+  navigateTo(path) {
+    history.pushState(null, "", path);
+    this.handleRoute(path);
+  }
+
+  handlePopState() {
+    this.handleRoute(window.location.pathname);
+  }
+
+  handleRoute(path) {
+    const app = document.getElementById("app");
+    const handler = this.routes[path] || this.routes["/404"];
+    if (handler) {
+      app.innerHTML = handler(this.state);
+    }
+  }
+
+  setLoggedIn(value) {
+    this.state.isLoggedIn = value;
+    this.handleRoute(window.location.pathname);
+  }
+}
+
+const router = new Router();
+
+router.addRoute("/", (state) => MainPage(state.isLoggedIn));
+router.addRoute("/login", (state) =>
+  state.isLoggedIn ? router.navigateTo("/") : LoginPage(),
+);
+router.addRoute("/profile", (state) =>
+  state.isLoggedIn ? ProfilePage() : router.navigateTo("/login"),
+);
+router.addRoute("/404", () => ErrorPage());
+
+document.querySelector("nav").addEventListener("click", (e) => {
+  if (e.target.tagName === "A") {
+    e.preventDefault();
+    router.navigateTo(e.target.pathname);
+  }
+});
+
+document.addEventListener("submit", (e) => {
+  if (e.target.matches("form")) {
+    e.preventDefault();
+    const email = e.target.querySelector('input[type="text"]').value;
+    const password = e.target.querySelector('input[type="password"]').value;
+
+    if (email && password) {
+      router.setLoggedIn(true);
+      router.navigateTo("/");
+    }
+  }
+});
+
+document.addEventListener("click", (e) => {
+  // 기존 네비게이션 처리
+  if (e.target.matches("a") && e.target.id !== "logout") {
+    e.preventDefault();
+    const path = e.target.getAttribute("href");
+    if (path !== "#") {
+      router.navigateTo(path);
+    }
+  }
+
+  // 로그아웃 처리
+  if (e.target.id === "logout") {
+    e.preventDefault();
+    router.setLoggedIn(false);
+    router.navigateTo("/");
+  }
+});
