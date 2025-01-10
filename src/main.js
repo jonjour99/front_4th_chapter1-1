@@ -1,45 +1,22 @@
-import router from "./routes/router";
-import handleProfile from "./pages/handleProfile";
-import handleChangeProfile from "./pages/handleChangeProfile";
-import handleLogin from "./pages/handleLogin";
-import hashRouter from "./routes/hashRouter";
+import { router } from "./router.js";
 
-window.addEventListener("load", () => {
-  if (window.location.hash) {
-    hashRouter();
-  } else {
-    router();
-  }
-});
-
-window.addEventListener("popstate", () => router());
-window.addEventListener("hashchange", () => hashRouter());
-
+// 링크 클릭 이벤트 처리
 document.addEventListener("click", (e) => {
-  if (e.target.tagName === "A") {
+  if (e.target.matches("a")) {
     e.preventDefault();
-    if (e.target.id === "logout") {
-      localStorage.removeItem("user");
-      router("/login");
-    } else {
-      const path = e.target.getAttribute("href");
-      router(path);
-      handleProfile();
+    const href = e.target.getAttribute("href");
+    if (href !== "#") {
+      window.history.pushState({}, "", href);
+      router();
     }
   }
 });
 
-document.addEventListener("submit", (e) => {
-  e.preventDefault();
-  const form = e.target;
-  const formData = new FormData(form);
-  const data = Object.fromEntries(formData);
+// 브라우저 뒤로가기/앞으로가기 처리
+window.addEventListener("popstate", router);
 
-  if (form.id == "login-form") {
-    handleLogin(data);
-  }
-  if (form.id == "profile-form") {
-    handleChangeProfile(data);
-  }
-  handleProfile();
+// 초기 라우팅 처리
+window.addEventListener("DOMContentLoaded", () => {
+  router();
+
 });
