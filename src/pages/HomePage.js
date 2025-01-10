@@ -1,5 +1,4 @@
 import { Layout } from "../layouts/Layout.js";
-
 export const HomePage = () => {
   const content = `
       <main class="p-4">
@@ -7,9 +6,7 @@ export const HomePage = () => {
           <textarea class="w-full p-2 border rounded" placeholder="무슨 생각을 하고 계신가요?"></textarea>
           <button class="mt-2 bg-blue-600 text-white px-4 py-2 rounded">게시</button>
         </div>
-
         <div class="space-y-4">
-
           <div class="bg-white rounded-lg shadow p-4">
             <div class="flex items-center mb-2">
               <img src="https://via.placeholder.com/40" alt="프로필" class="rounded-full mr-2">
@@ -25,7 +22,6 @@ export const HomePage = () => {
               <button>공유</button>
             </div>
           </div>
-
           <div class="bg-white rounded-lg shadow p-4">
             <div class="flex items-center mb-2">
               <img src="https://via.placeholder.com/40" alt="프로필" class="rounded-full mr-2">
@@ -41,7 +37,6 @@ export const HomePage = () => {
               <button>공유</button>
             </div>
           </div>
-
           <div class="bg-white rounded-lg shadow p-4">
             <div class="flex items-center mb-2">
               <img src="https://via.placeholder.com/40" alt="프로필" class="rounded-full mr-2">
@@ -57,7 +52,6 @@ export const HomePage = () => {
               <button>공유</button>
             </div>
           </div>
-
           <div class="bg-white rounded-lg shadow p-4">
             <div class="flex items-center mb-2">
               <img src="https://via.placeholder.com/40" alt="프로필" class="rounded-full mr-2">
@@ -73,7 +67,6 @@ export const HomePage = () => {
               <button>공유</button>
             </div>
           </div>
-
           <div class="bg-white rounded-lg shadow p-4">
             <div class="flex items-center mb-2">
               <img src="https://via.placeholder.com/40" alt="프로필" class="rounded-full mr-2">
@@ -92,6 +85,5 @@ export const HomePage = () => {
         </div>
       </main>
 `;
-
   return Layout(content, "/");
 };
