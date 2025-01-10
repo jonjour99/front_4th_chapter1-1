@@ -1,7 +1,9 @@
 import { Layout } from "../layouts/Layout.js";
+
 export const ProfilePage = () => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const { username = "", email = "", bio = "" } = user;
+
   const content = `
   
       <main class="p-4">

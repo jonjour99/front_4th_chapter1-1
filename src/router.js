@@ -1,66 +1,41 @@
-import { HomePage } from "./pages/HomePage.js";
-import { ProfilePage } from "./pages/ProfilePage.js";
-import { LoginPage } from "./pages/LoginPage.js";
-import { NotFoundPage } from "./pages/NotFoundPage.js";
-export const routes = {
-  "/": HomePage,
-  "/profile": ProfilePage,
-  "/login": LoginPage,
-  "/404": NotFoundPage,
-};
-const handlers = {
-  login: (event) => {
-    event.preventDefault();
-    const username = document.getElementById("username").value;
-    localStorage.setItem(
-      "user",
-      JSON.stringify({ username, email: "", bio: "" }),
-    );
-    navigate("/profile");
-  },
-  profile: (event) => {
-    event.preventDefault();
-    const user = JSON.parse(localStorage.getItem("user") || "{}");
-    const updatedUser = {
-      ...user,
-      username: document.getElementById("username").value,
-      email: document.getElementById("email").value,
-      bio: document.getElementById("bio").value,
-    };
-    localStorage.setItem("user", JSON.stringify(updatedUser));
-    router();
-  },
-};
+import { ROUTES } from "./config/routes.js";
+import { auth } from "./utils/auth.js";
+import { bindEvents } from "./utils/eventBinding.js";
+import { handleLogout } from "./handlers/formHandlers.js";
+
+// 내비게이션 함수
 const navigate = (path) => {
   window.history.pushState({}, "", path);
   router();
 };
-export const handleLogout = (e) => {
-  e.preventDefault();
-  localStorage.removeItem("user");
-  navigate("/login");
-};
+
+const getCurrentPath = () => window.location.pathname;
+
 export const router = () => {
-  const path = window.location.pathname;
-  const isAuthenticated = !!localStorage.getItem("user");
-  if (path === "/profile" && !isAuthenticated) {
-    navigate("/login");
-    return;
-  }
-  const page = routes[path] || routes["/404"];
-  document.getElementById("root").innerHTML = page();
-  // 이벤트 핸들러 연결
-  const forms = {
-    "login-form": handlers.login,
-    "profile-form": handlers.profile,
-    logout: handleLogout,
-  };
-  Object.entries(forms).forEach(([id, handler]) => {
-    const element = document.getElementById(id);
-    if (element) {
-      element instanceof HTMLFormElement
-        ? element.addEventListener("submit", handler)
-        : element.addEventListener("click", handler);
+  const currentPath = getCurrentPath();
+
+  // Auth state checks (로그인 상태 체크)
+  if (auth.isAuthenticated()) {
+    // 로그인된 사용자가 /login 페이지 접근 시도할 경우
+    if (currentPath === "/login") {
+      navigate("/");
+      return;
     }
-  });
+  } else {
+    // 로그인되지 않은 사용자가 보호된 라우트 접근 시도할 경우
+    if (currentPath === "/profile") {
+      navigate("/login");
+      return;
+    }
+  }
+
+  // Render page
+  const PageComponent = ROUTES[currentPath] || ROUTES["/404"];
+  const rootElement = document.getElementById("root");
+  rootElement.innerHTML = PageComponent();
+
+  // Bind events after rendering
+  bindEvents();
 };
+
+export { navigate, getCurrentPath, handleLogout, ROUTES as routes };
