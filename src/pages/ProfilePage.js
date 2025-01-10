@@ -1,6 +1,6 @@
 import { Layout } from "../layouts/Layout.js";
 
-export const ProfilePage = () => {
+const ProfilePage = () => {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
   const { username = "", email = "", bio = "" } = user;
 
@@ -62,3 +62,5 @@ export const ProfilePage = () => {
   `;
   return Layout(content, "/profile");
 };
+
+export default ProfilePage;

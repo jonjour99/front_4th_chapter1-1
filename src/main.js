@@ -18,4 +18,5 @@ window.addEventListener("popstate", router);
 // 초기 라우팅 처리
 window.addEventListener("DOMContentLoaded", () => {
   router();
+
 });
